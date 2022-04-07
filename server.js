@@ -12,7 +12,6 @@ const bcrypt = require("bcrypt");
 const sql_config = require("./website/private/sql_connection.json");
 const web_config = require("./website/private/web_config.json");
 
-//test test
 
 var localhost_http = () => {
     http.listen(80);
@@ -154,6 +153,17 @@ app.get("/register", (req, res) => {
         res.sendFile(path.join(__dirname, "website", "index", "register", "register.html"));
     }
 })
+
+var bootstrap = () => {
+
+    app.get("/node_modules/bootstrap/dist/css/bootstrap.css", (req, res) => {
+        res.sendFile(path.join(__dirname, "node_modules", "bootstrap", "dist", "css", "bootstrap.css"));
+    });
+    app.get("/node_modules/bootstrap/dist/js/bootstrap.bundle.js", (req, res) => {
+        res.sendFile(path.join(__dirname, "node_modules", "bootstrap", "dist", "js", "bootstrap.bundle.js"));
+    });
+}
+bootstrap();
 
 //TODO: Eventuell vereinfachen
 app.post("/auth_register", async(req, res) => {
