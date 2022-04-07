@@ -1,41 +1,17 @@
 console.log("Server startet!");
 
-const mysql = require("mysql");
 const express = require("express");
 const app = express();
 const session = require("express-session");
 const path = require("path");
 const https = require("https");
 const fs = require("fs");
-const http = express();
-const bcrypt = require("bcrypt");
-const sql_config = require("./website/private/sql_connection.json");
-const web_config = require("./website/private/web_config.json");
+const web_config = require("./private/configs/web_config.json");
 
-
-var localhost_http = () => {
-    http.listen(80);
-    http.get("*", (req, res) => {
-        res.writeHead(301, { Location: 'https://localhost' });
-        res.end();
-    });
-}
-var server_https = () => {
-    http.listen(80);
-    http.get("*", (req, res) => {
-        res.writeHead(301, { Location: 'https://manuel-privat.de' });
-        res.end();
-    });
-
-}
-
-//! Schauen das das richtige ausgewählt ist
-localhost_http();
-//? server_https();
 
 const sslServer = https.createServer({
-        key: fs.readFileSync(path.join(__dirname, "website", "private", "privat-key.pem")),
-        cert: fs.readFileSync(path.join(__dirname, "website", "private", "zertifikat.pem")),
+        key: fs.readFileSync(path.join(__dirname, "private", "privat-key.pem")),
+        cert: fs.readFileSync(path.join(__dirname, "private", "zertifikat.pem")),
     },
     app
 );
@@ -46,13 +22,6 @@ const {
     SESS_LIFETIME = SESSION_TIME
 } = process.env
 
-const sql_con = mysql.createConnection({
-    host: sql_config.host,
-    user: sql_config.user,
-    password: sql_config.password,
-    database: sql_config.database,
-});
-
 app.use(session({
     secret: web_config.secret,
     resave: true,
@@ -61,145 +30,34 @@ app.use(session({
         maxAge: SESS_LIFETIME
     }
 }));
+
 //! Alles genauer nochmal nachschauen
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'static'))); //nachschau
+app.use(express.static(path.join(__dirname, 'static')));
 
 
 app.get("/", (req, res) => {
-    if (req.session.loggedin == true) {
-        res.redirect("/home");
-    } else {
-        res.sendFile(path.join(__dirname, "website", "index", "login", "login.html"));
-    }
+    res.redirect("/home");
+    res.end();
 });
 
-app.post("/auth", (req, res) => {
-    let username = req.body.username;
-    let password = req.body.password;
+//ROUTES
+//*WEBSITE
 
-    sql_con.query("SELECT password FROM accounts WHERE email = ? OR username = ?", [username, username], (err, data, fields) => {
-        if (err) throw err;
-        if (data.length > 0) {
-            bcrypt.compare(password, data[0].password, (err, result) => {
-                if (err) throw err;
-                if (result) {
-                    req.session.loggedin = true;
-                    res.redirect("/home");
-                } else {
-                    res.send("Falscher Benutzername/E-Mail oder Passwort.");
-                }
-            });
-        } else {
-            res.send("Falscher Benutzername/E-Mail oder Paswort.");
-        }
-    });
-});
+const home_module = require("./website/routes/home_module");
+app.use("/home", home_module);
 
-var home_page = () => {
-    app.get("/home", (req, res) => {
-        if (req.session.loggedin) {
-            res.sendFile(path.join(__dirname, "website", "_website_pages", "home", "home.html"));
+const logout_module = require("./website/routes/logout_module");
+app.use("/logout", logout_module);
 
-        } else {
-            res.redirect("/");
-        }
-    });
-    app.get("/home.css", (req, res) => {
-        if (req.session.loggedin) {
-            res.sendFile(path.join(__dirname, "website", "_website_pages", "home", "home.css"));
-        }
-    })
-    app.get("/background_home.jpg", (req, res) => {
-        if (req.session.loggedin) {
-            res.sendFile(path.join(__dirname, "website", "_website_pages", "src", "pictures", "background_home.jpg"));
-        }
-    })
-}
-home_page();
+const login_module = require("./website/routes/login_module");
+app.use("/login", login_module);
 
-var logout_page = () => {
-    app.get("/logout", (req, res) => {
-        if (req.session.loggedin == true) {
-            req.session.loggedin = false;
-            res.sendFile(path.join(__dirname, "website", "_website_pages", "logout", "logout.html"));
-        } else {
-            res.redirect("/");
-        }
-    });
+const register_module = require("./website/routes/register_module");
+app.use("/register", register_module);
 
-}
-logout_page();
+const bootstrap_module = require("./routes/bootstrap_module");
+app.use("/bootstrap", bootstrap_module);
 
-var login_page = () => {
-    app.get("/login", (req, res) => {
-        if (req.session.loggedin == true) {
-            res.redirect("/home");
-        } else {
-            res.redirect("/");
-        }
-    });
-    app.get("/login.css", (req, res) => {
-        res.sendFile(path.join(__dirname, "website", "index", "login", "login.css"));
-    });
-    app.get("/background_login.jpg", (req, res) => {
-        res.sendFile(path.join(__dirname, "website", "_website_pages", "src", "pictures", "background_login.jpg"));
-    })
-}
-login_page();
-
-app.get("/register", (req, res) => {
-    if (req.session.loggedin) {
-        res.redirect("/home");
-    } else {
-        res.sendFile(path.join(__dirname, "website", "index", "register", "register.html"));
-    }
-})
-
-var bootstrap = () => {
-
-    app.get("/node_modules/bootstrap/dist/css/bootstrap.css", (req, res) => {
-        res.sendFile(path.join(__dirname, "node_modules", "bootstrap", "dist", "css", "bootstrap.css"));
-    });
-    app.get("/node_modules/bootstrap/dist/js/bootstrap.bundle.js", (req, res) => {
-        res.sendFile(path.join(__dirname, "node_modules", "bootstrap", "dist", "js", "bootstrap.bundle.js"));
-    });
-}
-bootstrap();
-
-//TODO: Eventuell vereinfachen
-app.post("/auth_register", async(req, res) => {
-    let username = req.body.r_username;
-    let email = req.body.r_email;
-    let password = req.body.r_password;
-
-    //Der Username wird in der Datenbank abgefragt
-    sql_con.query("SELECT id FROM accounts WHERE username = ?", [username], (err, data, fields) => {
-        if (err) throw err;
-        //Größer als 0 == User existier schon!
-        if (data.length > 0) {
-            res.send("Der Username ist schon vergeben!");
-        } else {
-            //Wenn User noch nicht vergeben ist
-            sql_con.query("SELECT id FROM accounts WHERE email = ?", [email], async(err, data, fields) => {
-                if (err) throw err;
-                //Wenn größer Null dann E-Mail schon vergeben
-                if (data.length > 0) {
-                    res.send("Die E-Mail wird schon benutzt!");
-                } else {
-                    //Wenn nicht dann Nutzer anlegen und weiterleiten
-                    try {
-                        var hashedPassword = await bcrypt.hash(password, 10);
-                        sql_con.query("INSERT INTO accounts (username, password, email) VALUE (?, ?, ?)", [username, hashedPassword, email], (err, data, fields) => {
-                            if (err) throw err;
-                            res.redirect("/login");
-                        })
-                    } catch {
-                        res.redirect("/home");
-                    }
-                }
-            });
-        }
-    });
-});
+//*TWITTER-BOT
