@@ -1,0 +1,6 @@
+[submodule "Twitter-Bot"]
+	path = Twitter-Bot
+	url = https://github.com/ManuelSigle/Twitter-Bot.git
+[submodule "website"]
+	path = website
+	url = https://github.com/ManuelSigle/website.git
