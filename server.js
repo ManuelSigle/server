@@ -143,6 +143,9 @@ var login_page = () => {
     app.get("/login.css", (req, res) => {
         res.sendFile(path.join(__dirname, "website", "index", "login", "login.css"));
     });
+    app.get("/background_login.jpg", (req, res) => {
+        res.sendFile(path.join(__dirname, "website", "_website_pages", "src", "pictures", "background_login.jpg"));
+    })
 }
 login_page();
 
