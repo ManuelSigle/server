@@ -61,3 +61,5 @@ const bootstrap_module = require("./routes/bootstrap_module");
 app.use("/bootstrap", bootstrap_module);
 
 //*TWITTER-BOT
+const twitter_bot_module = require("./Twitter-Bot/routes/twitter_bot_module");
+app.use("/twitter-bot", twitter_bot_module);

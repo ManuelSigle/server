@@ -6,6 +6,7 @@
     "express-session": "^1.17.2",
     "mysql": "^2.18.1",
     "nodemon": "^2.0.15",
+    "openai": "^2.0.5",
     "path": "^0.12.7",
     "twitter-api-v2": "^1.11.3"
   }
