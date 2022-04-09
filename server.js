@@ -61,5 +61,17 @@ const bootstrap_module = require("./routes/bootstrap_module");
 app.use("/bootstrap", bootstrap_module);
 
 //*TWITTER-BOT
-const twitter_bot_module = require("./Twitter-Bot/routes/twitter_bot_module");
-app.use("/twitter-bot", twitter_bot_module);
+const twitter_bot = require("./Twitter-Bot/modules/twitter_bot_module");
+
+const is_new_day = () => {
+    var date = new Date();
+    var date_hour = date.getHours();
+    var date_minutes = date.getMinutes();
+
+    if (date_hour == 1 && date_minutes == 0) {
+        twitter_bot.creat_new_day();
+    }
+}
+
+setInterval(is_new_day, 1000);
+setInterval(twitter_bot.tweet_check, 1000 * 60);
