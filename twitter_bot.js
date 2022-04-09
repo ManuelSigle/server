@@ -12,4 +12,4 @@ const is_new_day = () => {
 }
 
 setInterval(is_new_day, 1000);
-setInterval(twitter_bot.tweet_check, 1000 * 60);
+setInterval(twitter_bot.tweet_check, 1000 * 10);
