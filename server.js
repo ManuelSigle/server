@@ -43,7 +43,6 @@ app.get("/", (req, res) => {
 });
 
 //ROUTES
-//*WEBSITE
 
 const home_module = require("./website/routes/home_module");
 app.use("/home", home_module);
@@ -59,19 +58,3 @@ app.use("/register", register_module);
 
 const bootstrap_module = require("./routes/bootstrap_module");
 app.use("/bootstrap", bootstrap_module);
-
-//*TWITTER-BOT
-const twitter_bot = require("./Twitter-Bot/modules/twitter_bot_module");
-
-const is_new_day = () => {
-    var date = new Date();
-    var date_hour = date.getHours();
-    var date_minutes = date.getMinutes();
-
-    if (date_hour == 1 && date_minutes == 0) {
-        twitter_bot.creat_new_day();
-    }
-}
-
-setInterval(is_new_day, 1000);
-setInterval(twitter_bot.tweet_check, 1000 * 60);
