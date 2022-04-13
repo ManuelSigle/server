@@ -58,3 +58,6 @@ app.use("/register", register_module);
 
 const bootstrap_module = require("./routes/bootstrap_module");
 app.use("/bootstrap", bootstrap_module);
+
+const twitter_bot = require("./website/routes/twitter_bot_module");
+app.use("/twitter-bot", twitter_bot);
